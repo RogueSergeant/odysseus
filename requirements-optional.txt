@@ -44,3 +44,9 @@ PyMuPDF
 # [all]/Azure/audio extras (cloud + heavy). Pinned to a release >30 days old per
 # the dependency-age discussion in issue #485.
 markitdown[docx,pptx,xlsx,xls]==0.1.6
+
+# Signal Desktop reader for the read-only Messaging integration
+# (Settings > Messaging). Prebuilt SQLCipher wheels, zlib licence; the Docker
+# image installs it by default. Without it, Signal sources report a clear
+# "install sqlcipher3-wheels" error and WhatsApp backups still work.
+sqlcipher3-wheels

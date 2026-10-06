@@ -1,0 +1,26 @@
+# Read-only Signal Desktop access for the Messaging integration.
+#
+# Mounts Signal Desktop's data folder into the Odysseus container at
+# /host/signal, read-only. Odysseus copies the encrypted database to a private
+# temp file, reads it, and deletes the copy; it never writes to Signal's
+# folder and never talks to Signal's servers.
+#
+#   COMPOSE_FILE=docker-compose.yml:docker/signal-desktop.yml
+#   SIGNAL_DESKTOP_DIR=/home/you/.var/app/org.signal.Signal/config/Signal  # Flatpak default
+#   PUID=$(id -u)  PGID=$(id -g)   # must own the Signal folder
+#
+# create_host_path is off so a typo or a machine without Signal fails loudly
+# instead of Docker creating an empty root-owned folder in your home.
+# selinux: z labels the folder so the container may read it on SELinux hosts
+# (Fedora, Bazzite); Flatpak Signal runs unconfined and is unaffected.
+# Rootless Podman: also add `userns_mode: keep-id` under the odysseus service.
+services:
+  odysseus:
+    volumes:
+      - type: bind
+        source: ${SIGNAL_DESKTOP_DIR:-${HOME}/.var/app/org.signal.Signal/config/Signal}
+        target: /host/signal
+        read_only: true
+        bind:
+          create_host_path: false
+          selinux: z

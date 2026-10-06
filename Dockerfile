@@ -83,6 +83,13 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # lib installed above; see the apt note near the top of this stage.
 RUN pip install --no-cache-dir python-magic==0.4.27
 
+# sqlcipher3 opens Signal Desktop's encrypted database for the read-only
+# Messaging integration (src/messaging/signal_desktop.py). Prebuilt wheels
+# bundle SQLCipher + OpenSSL (permissive licences, see ACKNOWLEDGMENTS.md), so
+# no compiler or libsqlcipher-dev is needed; the app degrades with a clear
+# message when it is absent.
+RUN pip install --no-cache-dir sqlcipher3-wheels==0.5.7
+
 # Pre-install the patched basicsr/gfpgan/facexlib wheels built in the
 # realesrgan-wheels stage (--no-deps keeps the image lean — torch & friends are
 # pulled only when realesrgan is actually installed). With these dists already
