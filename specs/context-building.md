@@ -102,6 +102,7 @@ Guide-only/no-tools policy can suppress context acquisition before the model cal
 - `src.agent_loop` for active editor document, skill context, and tool-result reinsertion;
 - uploaded-file manifest/reference context for agent tools and later chat turns;
 - `src.tool_execution` for `web_search`, `web_fetch`, file, shell, MCP, and other tool outputs;
+- `src/tools/messaging.py` for Signal/WhatsApp message text, re-entering through the normal tool-result envelope with `EXTERNAL_UNTRUSTED` integrity;
 - `src.deep_research` and research handlers for search/fetch/extract flows used by research jobs, with fetched webpage text wrapped before extraction and analyzed URLs tracked separately from source snippets.
 
 ## Current Gaps

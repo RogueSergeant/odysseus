@@ -116,6 +116,15 @@ Current webhook event emitters include session creation, chat message/completion
 
 `/api/v1/chat` is an inbound external chat endpoint. It requires a `chat` API token, checks session ownership before resume, can create a session from a direct API key, and otherwise falls back to the first owner-visible enabled model endpoint. Token-supplied direct `base_url` values use public-URL validation; configured endpoints remain admin-trusted. Logs and delivery/error text that include endpoint URLs should pass through URL redaction helpers before persistence or diagnostics.
 
+## Personal Messaging (Signal / WhatsApp)
+
+`src.messaging` owns a read-only, owner-scoped index of the user's Signal and WhatsApp messages. It never connects to Signal or WhatsApp servers and has no send path. Sources are rows in `data/messaging.db` (`msg_sources`), managed by admin-only `routes.messaging_routes` under `/api/messaging` and the Settings > Messaging panel (`static/js/messagingSettings.js`); sources also appear as cards in the unified Integrations list.
+
+- `whatsapp_backup`: the Android phone's nightly `msgstore.db.crypt15`, delivered by Syncthing (`docker/messaging.yml`) into `data/messaging/inbox/whatsapp`, decrypted with the user's 64-digit end-to-end backup key (`src.messaging.whatsapp_backup`). Sender names come from Odysseus contacts matched on normalised phone numbers.
+- `signal_desktop`: Signal Desktop's SQLCipher database, read from a read-only mount (`docker/signal-desktop.yml`, `/host/signal`).
+
+`src.messaging.sync` reconciles a full source snapshot into the index on each run: new and edited messages are upserted and anything no longer in the source (delete-for-everyone, expired or disappearing messages, chats removed on the phone) is deleted. Disappearing, deleted, system and status-broadcast messages are never indexed. Users can exclude a chat, which purges it and keeps it out of later syncs. Source paths are confined to the Syncthing inbox, `/host/signal`, and `ODYSSEUS_MESSAGING_PATHS`. The built-in `sync_messaging` task runs every 15 minutes, skips unchanged WhatsApp backups by mtime, stays silent when nothing changed or a known error repeats, and fires `messages_synced` when new messages arrive.
+
 ## Task Webhooks And Event Triggers
 
 Task webhook triggers are separate inbound webhooks. `app.py` exempts only `/api/tasks/{task_id}/webhook/{token}` from normal auth so external callers can trigger tasks without cookies. `routes.task.task_routes` owns token generation/regeneration and validates task id, token, and active status before queueing a run; the top-level route module is a compatibility alias.

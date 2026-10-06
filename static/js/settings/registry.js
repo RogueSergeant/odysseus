@@ -90,6 +90,13 @@ export const SETTINGS_PANELS = Object.freeze([
     group: 'communications',
     keywords: ['reminders', 'notifications', 'alerts'],
   }),
+  definePanel({
+    id: 'messaging',
+    label: 'Messaging',
+    group: 'communications',
+    adminOnly: true,
+    keywords: ['messaging', 'signal', 'whatsapp', 'messages', 'chats', 'syncthing'],
+  }),
 
   definePanel({
     id: 'appearance',

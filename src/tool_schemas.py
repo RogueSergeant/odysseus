@@ -571,7 +571,8 @@ FUNCTION_TOOL_SCHEMAS = [
                         "tidy_sessions", "tidy_documents", "consolidate_memory", "tidy_research",
                         "summarize_emails", "draft_email_replies", "extract_email_events",
                         "classify_events", "learn_sender_signatures",
-                        "test_skills", "audit_skills", "check_email_urgency"
+                        "test_skills", "audit_skills", "check_email_urgency",
+                        "sync_messaging"
                     ],
                                     "description": "Built-in action (for task_type=action)"},
                     "trigger_type": {"type": "string", "enum": ["schedule", "event"],
@@ -580,7 +581,7 @@ FUNCTION_TOOL_SCHEMAS = [
                                  "description": "Schedule frequency (for trigger_type=schedule)"},
                     "scheduled_time": {"type": "string", "description": "HH:MM in UTC (for schedule triggers). Convert the user's stated local time using the UTC offset given in the 'Current date and time' context."},
                     "scheduled_day": {"type": "integer", "description": "Day of week 0=Mon (weekly) or day of month (monthly)"},
-                    "trigger_event": {"type": "string", "enum": ["session_created", "message_sent", "document_created", "memory_added", "research_completed", "email_received", "skill_added"],
+                    "trigger_event": {"type": "string", "enum": ["session_created", "message_sent", "document_created", "memory_added", "research_completed", "email_received", "skill_added", "messages_synced"],
                                       "description": "Event name (for trigger_type=event)"},
                     "trigger_count": {"type": "integer", "description": "Fire every N events (for trigger_type=event)"},
                     "output_target": {"type": "string", "description": "Where results go. Defaults to 'session' (results land in a dedicated chat session the user reads) — this is the right choice for 'summarize for me' / 'send to me'. Do NOT go hunting for the user's email address; only use an email MCP tool name here if the user explicitly asked to be emailed AND an address is already known."}
@@ -1093,6 +1094,59 @@ FUNCTION_TOOL_SCHEMAS = [
                     "address": {"type": "string", "description": "Postal/mailing address as a single human-readable string."},
                 },
                 "required": ["action"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_messenger_chats",
+            "description": "List the user's Signal and WhatsApp chats (read-only local index), most recent first, with chat_id, title, message count and last activity. Use to find the chat_id for read_messenger_chat, or to answer 'who have I been messaging'.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source": {"type": "string", "description": "Optional: 'signal' or 'whatsapp' to limit to one app."},
+                    "query": {"type": "string", "description": "Optional: filter chats whose name contains this text (person or group name)."},
+                    "limit": {"type": "integer", "description": "Max chats to return (default 30)."},
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_messenger_chat",
+            "description": "Read messages from one Signal or WhatsApp chat, oldest first. Without before/after it returns the latest messages. Get chat_id from list_messenger_chats or search_messenger_messages. Read-only.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "chat_id": {"type": "integer", "description": "Chat id from list_messenger_chats / search_messenger_messages."},
+                    "before": {"type": "string", "description": "Optional ISO date/datetime: only messages before this (user's local time if no offset)."},
+                    "after": {"type": "string", "description": "Optional ISO date/datetime: only messages after this."},
+                    "limit": {"type": "integer", "description": "Max messages (default 50)."},
+                },
+                "required": ["chat_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_messenger_messages",
+            "description": "Full-text search across the user's Signal and WhatsApp messages (read-only local index). Filter by app, chat, sender and date range. Returns matching messages with chat_id so you can open the conversation with read_messenger_chat.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Words to search for (all must match; prefix matching). May be empty when filtering by sender/date."},
+                    "source": {"type": "string", "description": "Optional: 'signal' or 'whatsapp'."},
+                    "chat_id": {"type": "integer", "description": "Optional: limit to one chat."},
+                    "sender": {"type": "string", "description": "Optional: sender name or phone number contains this text. Use 'Me' for the user's own messages."},
+                    "since": {"type": "string", "description": "Optional ISO date/datetime lower bound (user's local time if no offset)."},
+                    "until": {"type": "string", "description": "Optional ISO date/datetime upper bound."},
+                    "limit": {"type": "integer", "description": "Max results (default 20)."},
+                },
+                "required": []
             }
         }
     },

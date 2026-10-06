@@ -262,6 +262,7 @@ function buildFixture(document) {
     'integrations',
     'email',
     'reminders',
+    'messaging',
     'appearance',
     'shortcuts',
     'account',
@@ -381,6 +382,7 @@ function moduleSource(relativePath) {
       'integrations',
       'email',
       'reminders',
+      'messaging',
       'appearance',
       'shortcuts',
       'account',
@@ -427,7 +429,7 @@ function moduleSource(relativePath) {
     'Settings registry exposes group membership in sidebar order',
     context.getSettingsPanelsForGroup('communications')
       .map(panel => panel.id)
-      .join(',') === 'integrations,email,reminders',
+      .join(',') === 'integrations,email,reminders,messaging',
   );
 
   check(

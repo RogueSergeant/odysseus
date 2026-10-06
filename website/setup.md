@@ -502,6 +502,73 @@ and Microsoft 365 generally require OAuth instead, so normal Microsoft mailbox
 passwords will fail. See [the Outlook email guide](email-outlook.md) for the
 current limitation and the planned integration direction.
 
+### Signal and WhatsApp (read-only messaging)
+Agents can read and search your Signal and WhatsApp messages through three
+read-only tools (`list_messenger_chats`, `read_messenger_chat`,
+`search_messenger_messages`). Odysseus never connects to Signal or WhatsApp and
+cannot send anything: it copies messages from data you already hold into
+`data/messaging.db`. Disappearing messages are never copied, and anything you
+delete is removed on the next sync. Admin-only; see `THREAT_MODEL.md`.
+
+**WhatsApp (Android).** WhatsApp writes an encrypted backup to the phone every
+night (around 02:00), whether or not Google Drive backup is on. Odysseus reads
+that file; your WhatsApp account is never touched, so there is no ban risk.
+
+1. On the phone, in WhatsApp: *Settings > Chats > Chat backup > End-to-end
+   encrypted backup*, turn it on and choose **Use 64-digit encryption key
+   instead**. Keep the key somewhere safe. "Back up to Google Drive" can stay
+   on or be set to *Never*; Odysseus only uses the copy on the phone.
+2. Start the Syncthing overlay on the Odysseus host:
+   ```bash
+   # .env
+   COMPOSE_FILE=docker-compose.yml:docker/messaging.yml
+   PUID=1000   # `id -u`
+   PGID=1000   # `id -g`
+   ```
+   `docker compose up -d`, then on Fedora/Bazzite open the sync port:
+   `sudo firewall-cmd --permanent --add-service=syncthing && sudo firewall-cmd --reload`.
+3. Install **Syncthing-Fork** on the phone (F-Droid or Play), allow *All files
+   access*, and add the folder
+   `Android/media/com.whatsapp/WhatsApp/Databases` as **Send Only**.
+4. Open the Odysseus Syncthing UI at `http://127.0.0.1:8384`, add the phone as a
+   device, and accept the folder into `/var/syncthing/whatsapp` as **Receive
+   Only**. For LAN-only sync, turn off *Enable Relaying* and *Global Discovery*
+   on both ends.
+5. In Odysseus, *Settings > Messaging > WhatsApp*: paste the 64-digit key and
+   click **Add WhatsApp**. It tests, then syncs.
+6. Sender names come from your contacts. Export your phone's contacts as a
+   `.vcf` file and import it once under *Settings > Integrations > Add
+   Integration > Contacts* (Contacts Import).
+
+The built-in *Messaging Sync* task checks every 15 minutes and re-reads the
+backup only when a new one arrives, so WhatsApp is up to a day behind.
+
+**Signal (Signal Desktop on the same machine).** Odysseus reads Signal
+Desktop's own database through a read-only mount, so it has whatever history
+Desktop has (including the up-to-45-day transfer offered when you link it).
+
+1. Add the overlay and point it at Signal's folder (Flatpak shown; a native
+   install uses `~/.config/Signal`):
+   ```bash
+   # .env
+   COMPOSE_FILE=docker-compose.yml:docker/messaging.yml:docker/signal-desktop.yml
+   SIGNAL_DESKTOP_DIR=/home/you/.var/app/org.signal.Signal/config/Signal
+   PUID=1000   # `id -u`, must own that folder
+   PGID=1000
+   ```
+   then `docker compose up -d`. The mount is read-only and labelled for SELinux
+   (`:z`); with rootless Podman also set `userns_mode: keep-id` on the
+   `odysseus` service.
+2. *Settings > Messaging > Signal Desktop*: click **Add Signal**. The Flathub
+   build stores Signal's key in its config file, so usually nothing else is
+   needed. If Test says the key is in your keyring (KWallet / GNOME Keyring),
+   run the command it shows on the host, e.g.
+   `kwallet-query -r "Chromium Safe Storage" -f "Chromium Keys" kdewallet`, and
+   paste the output into *Keyring password*.
+
+Signal syncs every 15 minutes while its database is changing. Disappearing
+and view-once messages are never copied.
+
 ## Security Notes
 Odysseus is a self-hosted workspace with powerful local tools: shell access, file uploads, model downloads, web research, email/calendar integrations, and API tokens. Treat it like an admin console.
 

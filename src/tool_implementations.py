@@ -68,6 +68,10 @@ from src.tools.image import do_edit_image  # noqa: F401
 from src.tools.research import do_manage_research, do_trigger_research  # noqa: F401
 # Contacts domain extracted to src/tools/contacts.py (slice 1, #4082/#4071).
 from src.tools.contacts import do_resolve_contact, do_manage_contact  # noqa: F401
+# Messaging (Signal / WhatsApp index, read-only) lives in src/tools/messaging.py.
+from src.tools.messaging import (  # noqa: F401
+    do_list_messenger_chats, do_read_messenger_chat, do_search_messenger_messages,
+)
 # Vault domain extracted to src/tools/vault.py (slice 1, #4082/#4071).
 from src.tools.vault import (  # noqa: F401
     _load_vault_config, _run_bw,

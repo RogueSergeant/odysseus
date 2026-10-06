@@ -3391,6 +3391,40 @@ async def action_cookbook_serve(
     return f"Launched {repo_id} (session {sid})", True
 
 
+async def action_sync_messaging(owner: str, **kwargs) -> Tuple[str, bool]:
+    """Refresh the local Signal / WhatsApp index from each enabled source.
+
+    Cheap when nothing changed (WhatsApp backups are skipped until the backup
+    file's mtime moves), and a no-op run leaves no TaskRun row. Fires
+    ``messages_synced`` when new messages arrived so users can chain tasks
+    such as an evening digest.
+    """
+    import asyncio as _asyncio
+    from src.messaging import store as _store
+    from src.messaging.sync import sync_all
+
+    if not await _asyncio.to_thread(_store.list_sources, owner, include_disabled=False):
+        raise TaskNoop("sync_messaging: no messaging sources configured")
+    results = await _asyncio.to_thread(sync_all, owner)
+    added = sum(int(r.get("added") or 0) for r in results.values())
+    removed = sum(int(r.get("removed") or 0) for r in results.values())
+    updated = sum(int(r.get("updated") or 0) for r in results.values())
+    errors = [f"{r.get('name')}: {r.get('error')}" for r in results.values()
+              if r.get("status") == "error" and not r.get("repeat")]
+    if not (errors or added or removed or updated):
+        raise TaskNoop("sync_messaging: no changes")
+    if added:
+        try:
+            from src.event_bus import fire_event
+            fire_event("messages_synced", owner)
+        except Exception:
+            logger.debug("messages_synced event not fired", exc_info=True)
+    summary = f"Messaging sync: {added} new, {removed} removed"
+    if errors:
+        return summary + ". Errors: " + "; ".join(errors), False
+    return summary, True
+
+
 BUILTIN_ACTIONS = {
     "tidy_sessions": action_tidy_sessions,
     "tidy_documents": action_tidy_documents,
@@ -3411,6 +3445,7 @@ BUILTIN_ACTIONS = {
     "test_skills": action_test_skills,
     "audit_skills": action_audit_skills,
     "check_email_urgency": action_check_email_urgency,
+    "sync_messaging": action_sync_messaging,
     "cookbook_serve": action_cookbook_serve,
     # ping_notes removed from the registry — runs only inside `_note_pings_loop`.
 }
@@ -3433,4 +3468,5 @@ BUILTIN_ACTION_INFO = {
     "test_skills": "Run the per-skill Test on every skill: agent run + LLM judge → records verdict on the skill (pass/needs_work/fail/inconclusive). Advisory only — never rewrites or demotes anything.",
     "audit_skills": "Audit unaudited skills after enough new skills are added: test, narrow metadata, self-edit/retry, optional teacher rewrite, tag duplicates/trivial skills, and publish/draft using the auto-approve threshold.",
     "check_email_urgency": "Scan unread emails hourly, tag urgent/reply-soon/newsletter/marketing/spam, and send a reminder when a new email needs a fast reply.",
+    "sync_messaging": "Refresh the read-only Signal / WhatsApp message index from Signal Desktop and the phone's WhatsApp backup (Settings > Messaging). Skips silently when nothing changed.",
 }

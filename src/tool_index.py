@@ -53,6 +53,8 @@ ASSISTANT_ALWAYS_AVAILABLE = frozenset({
     "manage_memory", "web_search", "read_file",
     "create_document", "update_document",
     "resolve_contact", "search_chats",
+    # Read-only Signal / WhatsApp index (check-ins: "anything I missed?").
+    "list_messenger_chats", "read_messenger_chat", "search_messenger_messages",
     "api_call",  # For Miniflux/Gitea/Linkding/etc. integrations
     # Core UI control (toggles, open panels, switch model/mode, themes).
     # Always available so vague follow-ups ("now make it playful", "make it
@@ -120,6 +122,9 @@ BUILTIN_TOOL_DESCRIPTIONS: Dict[str, str] = {
     "mark_email_read": "Mark an email as read or unread by toggling the \\Seen flag.",
     "bulk_email": "Perform one action on many emails at once. Use for delete all those, archive these, mark all read, move spam to junk. Takes explicit UIDs from list_emails or all_unread=true. Always pass account for Gmail/work/custom mailbox results.",
     "resolve_contact": "Look up a contact's email address by name. Searches CardDAV address book and sent email history. Use when the user says 'message [name]', 'email [name]', or 'send to [name]' without an email address.",
+    "list_messenger_chats": "List the user's Signal and WhatsApp chats from the local read-only message index: people and group chats, most recent first, with chat_id, message counts and last activity. Use for 'who have I been messaging', 'my WhatsApp groups', or to find a chat_id before reading it. Cannot send messages.",
+    "read_messenger_chat": "Read a Signal or WhatsApp conversation (one chat_id) from the local read-only message index, oldest first, optionally between dates. Use to catch up on a chat, summarise what someone said, or see the context around a search hit. Cannot send messages.",
+    "search_messenger_messages": "Search the user's Signal and WhatsApp messages (texts, group chats) by words, sender, chat and date range. Use for 'what did X say about Y', 'find the message with the address', 'when did we agree on Friday', 'did anyone text me about'. Read-only local index; cannot send messages.",
     "manage_contact": "Save / update / delete / list address-book contacts (CardDAV). Use for info about ANOTHER person — name, email, phone, postal address. Args: action=list|add|update|delete, name, email, phones, address, uid (from list). For 'save this for <person>' / address pastes / phone numbers next to a name, this is the right tool — NOT manage_memory. Do NOT use for facts about the USER ('my name is X'); those are manage_memory.",
     "manage_notes": "Create and manage notes and checklists (Google Keep-style). ALWAYS use this for note/todo/checklist/reminder creation — NEVER hit /api/notes via app_api. Accepts natural-language `due_date` like 'tomorrow at 9am' or '11pm today' (parsed in the USER'S timezone). The due_date IS the reminder — it fires a notification at that time, so do NOT also create a calendar event for the same reminder. Set colors, labels, pin, archive. Do NOT use manage_memory for note content.",
     "manage_calendar": "Calendar event management: list, create, update, delete. Each event can carry a tag/category (event_type — work/personal/health/travel/meal/social/admin/other) and importance (low/normal/high/critical). Resolve today/tomorrow using the Current date and time context, then use ISO datetimes in the user's local wall time; supports all-day events. Use rrule only for explicit recurrence; for update_event pass rrule='' to remove repeats. For event reminders/alarms, pass reminder_minutes; this creates the Notes reminder, so do not also call manage_notes for the same reminder.",
@@ -352,6 +357,12 @@ class ToolIndex:
         # believed it had only email tools and refused web/other tasks (#1707).
         frozenset({"email", "emails", "mail", "mails", "gmail", "googlemail", "message", "messages", "send", "reply", "replies", "inbox", "unread"}):
             {"list_email_accounts", "list_emails", "read_email", "scan_email_unsubscribes", "unsubscribe_email", "send_email", "reply_to_email", "bulk_email", "delete_email", "archive_email", "mark_email_read", "resolve_contact", "ui_control"},
+        # Personal messaging (Signal / WhatsApp, read-only). "message(s)" also
+        # hits the email set above; both domains are plausible for "messages".
+        frozenset({"message", "messages", "signal", "whatsapp", "whats app", "texted",
+                   "texts", "text message", "text messages", "group chat", "messaged",
+                   "dm", "dms"}):
+            {"list_messenger_chats", "read_messenger_chat", "search_messenger_messages"},
         frozenset({"calendar", "event", "meeting", "schedule", "appointment"}):
             {"manage_calendar"},
         # Detached background `bash` jobs (#!bg): check on / read output / kill.

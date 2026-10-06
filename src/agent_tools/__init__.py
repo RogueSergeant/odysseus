@@ -14,7 +14,7 @@ Sub-modules:
 import logging
 from collections import namedtuple
 
-from src.tool_security import BUILTIN_EMAIL_TOOLS
+from src.tool_security import BUILTIN_EMAIL_TOOLS, MESSENGER_TOOLS
 from src.tool_utils import _truncate, get_mcp_manager, set_mcp_manager
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,7 @@ TOOL_TAGS = {"bash", "python", "web_search", "web_fetch", "read_file", "write_fi
              # Generic loopback to any UI-button endpoint (cookbook,
              # gallery, email folders, etc.) — agent uses this when
              # there's no named tool wrapper for the action.
-             "app_api"} | BUILTIN_EMAIL_TOOLS
+             "app_api"} | BUILTIN_EMAIL_TOOLS | MESSENGER_TOOLS
 
 ToolBlock = namedtuple("ToolBlock", ["tool_type", "content"])
 

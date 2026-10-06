@@ -1890,6 +1890,9 @@ const TOOL_META = {
   manage_webhooks:   { name: 'Webhooks',         desc: 'Configure webhook events',        cat: 'System',     ctx: '~100' },
   manage_tokens:     { name: 'API Tokens',       desc: 'Manage API access tokens',        cat: 'System',     ctx: '~100' },
   manage_settings:   { name: 'Settings',         desc: 'Change app settings',             cat: 'System',     ctx: '~100' },
+  list_messenger_chats:      { name: 'Messenger Chats',  desc: 'List Signal/WhatsApp chats (read-only)',  cat: 'Messaging', ctx: '~150' },
+  read_messenger_chat:       { name: 'Read Messenger Chat', desc: 'Read a Signal/WhatsApp chat (read-only)', cat: 'Messaging', ctx: '~150' },
+  search_messenger_messages: { name: 'Search Messages',  desc: 'Search Signal/WhatsApp messages',         cat: 'Messaging', ctx: '~200' },
 };
 
 async function loadBuiltinTools() {

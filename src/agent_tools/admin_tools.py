@@ -14,7 +14,7 @@ import logging
 from typing import Optional, Dict
 
 from src.tool_utils import get_mcp_manager, _parse_tool_args
-from src.tool_security import BUILTIN_EMAIL_TOOLS
+from src.tool_security import BUILTIN_EMAIL_TOOLS, MESSENGER_TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -728,6 +728,10 @@ async def do_manage_settings(content: str, owner: Optional[str] = None) -> Dict:
                 "email": sorted(BUILTIN_EMAIL_TOOLS)
                          + [f"mcp__email__{t}" for t in sorted(BUILTIN_EMAIL_TOOLS)],
                 "research": ["web_search", "web_fetch"],  # research is a per-request flag, not a tool (closest analog)
+                "messaging": sorted(MESSENGER_TOOLS),
+                "messages": sorted(MESSENGER_TOOLS),
+                "signal": sorted(MESSENGER_TOOLS),
+                "whatsapp": sorted(MESSENGER_TOOLS),
             }
 
             if action == "list_tools":
@@ -736,7 +740,7 @@ async def do_manage_settings(content: str, owner: Optional[str] = None) -> Dict:
                     "response": (
                         f"Currently disabled: {', '.join(current) if current else '(none)'}.\n"
                         "Common toggles: shell (bash), search (web_search), browser, documents, "
-                        "memory, skills, images, tasks, notes, calendar, email."
+                        "memory, skills, images, tasks, notes, calendar, email, messaging."
                     ),
                     "disabled": list(current),
                     "exit_code": 0,

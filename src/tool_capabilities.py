@@ -15,7 +15,7 @@ from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
 from src.tool_approval_scopes import CHAT_SESSION_APPROVAL_CONTEXT_MARKER
-from src.tool_security import BUILTIN_EMAIL_TOOLS, is_public_blocked_tool
+from src.tool_security import BUILTIN_EMAIL_TOOLS, MESSENGER_TOOLS, is_public_blocked_tool
 
 
 class ToolEffect(str, Enum):
@@ -123,6 +123,13 @@ _register(
         "vault_get",
         "vault_search",
     },
+    ToolEffect.READ_PRIVATE,
+    result_integrity=ResultIntegrity.EXTERNAL_UNTRUSTED,
+)
+# Signal / WhatsApp message text is written by other people: private to read,
+# and untrusted once it reaches the model (arms the approval gate).
+_register(
+    MESSENGER_TOOLS,
     ToolEffect.READ_PRIVATE,
     result_integrity=ResultIntegrity.EXTERNAL_UNTRUSTED,
 )

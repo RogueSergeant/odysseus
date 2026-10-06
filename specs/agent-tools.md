@@ -66,6 +66,8 @@ When adding, removing, or renaming a tool, update the registry chain, execution 
 
 `src.tool_index.ALWAYS_AVAILABLE` is the retrieval catalog for high-frequency tools such as shell/python, web search/fetch, read/write/edit-file, code-nav, `manage_memory`, `ask_user`, `update_plan`, selected Cookbook serve controls, and `app_api`. Current prompt/schema assembly preserves only selected base tools unconditionally, then adds intent-, skill-, and retrieval-relevant tools so unrelated schemas do not flood small contexts.
 
+Read-only messaging tools (`list_messenger_chats`, `read_messenger_chat`, `search_messenger_messages`) are native in-process handlers in `src/tools/messaging.py`. `MESSENGER_TOOLS` in `src.tool_security` is their single source of truth for fence tags, the non-admin blocklist and the plan-mode allowlist (`tests/test_messaging_registry_sync.py`). They are classified `READ_PRIVATE` with `EXTERNAL_UNTRUSTED` results, like the email read tools.
+
 ## Tool Retrieval And Execution
 
 `src.tool_index.ToolIndex` owns candidate retrieval using embeddings/keywords and cached index data. Security filtering is not its hard boundary: `agent_loop` hides unavailable schemas, and `tool_execution` blocks disabled, admin-only, and public-restricted calls before dispatch.

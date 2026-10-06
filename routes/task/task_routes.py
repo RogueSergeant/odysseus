@@ -1040,6 +1040,7 @@ def setup_task_routes(task_scheduler) -> APIRouter:
             {"name": "research_completed", "description": "Fires when a research report completes"},
             {"name": "email_received", "description": "Fires when new inbox mail is observed"},
             {"name": "skill_added", "description": "Fires when a new skill is created"},
+            {"name": "messages_synced", "description": "Fires when a Signal/WhatsApp sync brings in new messages"},
         ]}
 
     @router.post("/{task_id}/webhook/{token}")

@@ -36,6 +36,23 @@ The full license texts are kept in [`licenses/`](licenses/).
   Deep Research feature (`services/research/`, `src/research_handler.py`,
   `routes/research_routes.py`, `services/search/`). Full text in
   [`licenses/DeepResearch-Apache-2.0.txt`](licenses/DeepResearch-Apache-2.0.txt).
+- **[Whatsapp-Chat-Exporter](https://github.com/KnugiHK/Whatsapp-Chat-Exporter)**
+  by **KnugiHK**. Copyright © 2021-2026 Knugi. **MIT License.** Its Android
+  `msgstore.db` handling (modern `message`/`chat`/`jid` joins, the `jid_map`
+  LID-to-phone mapping, deleted-message types) informed
+  `src/messaging/whatsapp_backup.py`. Full text in
+  [`licenses/Whatsapp-Chat-Exporter-MIT-LICENSE.txt`](licenses/Whatsapp-Chat-Exporter-MIT-LICENSE.txt).
+- **[signal-export](https://github.com/carderne/signal-export)** by
+  **Chris Arderne**. Copyright © 2022 Chris Arderne. **MIT License.** Its
+  Signal Desktop key recovery (`config.json` `key`/`encryptedKey`, Electron
+  safeStorage PBKDF2/AES-CBC parameters, KWallet/libsecret lookups) and
+  SQLCipher pragmas were adapted in `src/messaging/signal_desktop.py`. Full
+  text in [`licenses/signal-export-MIT-LICENSE.txt`](licenses/signal-export-MIT-LICENSE.txt).
+- **[wa-crypt-tools](https://github.com/ElDavoo/wa-crypt-tools)** by
+  **ElDavoo** (GPL-3.0-or-later) documents the `.crypt15` backup format and
+  key derivation that `src/messaging/whatsapp_backup.py` implements
+  independently. No code is included; it was used offline to generate the
+  test fixture `tests/fixtures/messaging/msgstore.db.crypt15`.
 
 ---
 
@@ -162,6 +179,9 @@ concerns from earlier are resolved:
   deployment (Artifex also sells a commercial PyMuPDF license that lifts this).
 - **`caldav`** (Python lib) is **dual-licensed GPL-3.0-or-later OR Apache-2.0**.
   Odysseus uses it under **Apache-2.0**, which is permissive and MIT-compatible.
+- **`sqlcipher3-wheels`** is **zlib**-licensed and bundles SQLCipher Community Edition (**BSD-style**) and
+  OpenSSL (**Apache-2.0**). It is installed in the Docker image and optional elsewhere; it is only used to read
+  Signal Desktop's database for the Messaging integration (`src/messaging/signal_desktop.py`).
 - **`markitdown`** (Microsoft) is **MIT** and used only as an *optional* dependency for Office/EPUB text
   extraction (`src/markitdown_runtime.py`), lazy-imported with graceful fallback — the MIT core runs without
   it. The cloud `az-doc-intel` extra is deliberately **not** installed, keeping extraction fully local.

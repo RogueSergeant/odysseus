@@ -37,6 +37,9 @@ SKILLS_FILE = os.path.join(DATA_DIR, "skills.json")
 APP_DB = os.path.join(DATA_DIR, "app.db")
 SCHEDULED_EMAILS_DB = os.path.join(DATA_DIR, "scheduled_emails.db")
 EMAIL_CACHE_DB = os.path.join(DATA_DIR, "email_cache.db")
+# Messaging (Signal Desktop / WhatsApp backup) index. Plaintext message text
+# at rest, protected by file mode like the email index — see THREAT_MODEL.md.
+MESSAGING_DB = os.path.join(DATA_DIR, "messaging.db")
 
 # Data subdirectories
 PERSONAL_UPLOADS_DIR = os.path.join(DATA_DIR, "personal_uploads")
@@ -53,6 +56,11 @@ SKILLS_DIR = os.path.join(DATA_DIR, "skills")
 GALLERY_DIR = os.path.join(DATA_DIR, "gallery")
 GALLERY_UPLOADS_DIR = os.path.join(DATA_DIR, "gallery_uploads")
 MEMORY_VECTORS_DIR = os.path.join(DATA_DIR, "memory_vectors")
+MESSAGING_DIR = os.path.join(DATA_DIR, "messaging")
+# Syncthing drops the phone's WhatsApp backup here (docker/messaging.yml).
+MESSAGING_INBOX_DIR = os.path.join(MESSAGING_DIR, "inbox")
+# Short-lived decrypted copies of source databases; always removed after a sync.
+MESSAGING_TMP_DIR = os.path.join(MESSAGING_DIR, "tmp")
 
 # The only part of DATA_DIR the agent's file tools and subprocesses may touch.
 # Everything else under DATA_DIR is application state (session store, auth

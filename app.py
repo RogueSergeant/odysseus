@@ -884,6 +884,10 @@ app.include_router(setup_vault_routes())
 from routes.contacts.contacts_routes import setup_contacts_routes
 app.include_router(setup_contacts_routes())
 
+# Messaging (read-only Signal Desktop / WhatsApp backup index)
+from routes.messaging_routes import setup_messaging_routes
+app.include_router(setup_messaging_routes())
+
 from companion import setup_companion_routes
 app.include_router(setup_companion_routes())
 

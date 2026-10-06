@@ -992,6 +992,7 @@ async def _execute_tool_block_impl(
         do_manage_contact,
         do_vault_search, do_vault_get, do_vault_unlock,
         do_app_api,
+        do_list_messenger_chats, do_read_messenger_chat, do_search_messenger_messages,
     )
 
     # HACK:
@@ -1250,6 +1251,15 @@ async def _execute_tool_block_impl(
     elif tool == "manage_contact":
         desc = "manage_contact"
         result = await do_manage_contact(content, owner=owner)
+    elif tool == "list_messenger_chats":
+        desc = "messaging: list_messenger_chats"
+        result = await do_list_messenger_chats(content, owner=owner)
+    elif tool == "read_messenger_chat":
+        desc = "messaging: read_messenger_chat"
+        result = await do_read_messenger_chat(content, owner=owner)
+    elif tool == "search_messenger_messages":
+        desc = "messaging: search_messenger_messages"
+        result = await do_search_messenger_messages(content, owner=owner)
     elif tool == "vault_search":
         desc = "vault_search"
         result = await do_vault_search(content, owner=owner)

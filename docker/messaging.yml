@@ -1,0 +1,35 @@
+# WhatsApp backup delivery for the read-only Messaging integration.
+#
+# Adds a Syncthing container that receives the phone's nightly WhatsApp
+# backup (msgstore.db.crypt15) into ./data/messaging/inbox/whatsapp, where
+# Odysseus decrypts it with your 64-digit backup key (Settings > Messaging).
+# Nothing here talks to WhatsApp. To keep the backup strictly on your LAN,
+# turn off "Enable Relaying" and "Global Discovery" in Syncthing's settings
+# (Actions > Settings > Connections) on both this instance and the phone.
+#
+#   COMPOSE_FILE=docker-compose.yml:docker/messaging.yml
+#   docker compose up -d
+#
+# Then open http://127.0.0.1:8384, add the phone (Syncthing-Fork) as a device,
+# and accept its "WhatsApp Databases" folder into /var/syncthing/whatsapp as
+# Receive Only. PUID/PGID must match the Odysseus container (default 1000) so
+# Odysseus can read what Syncthing writes. On Fedora/Bazzite also open the
+# sync port: sudo firewall-cmd --permanent --add-service=syncthing && sudo firewall-cmd --reload
+services:
+  syncthing:
+    image: ${SYNCTHING_IMAGE:-syncthing/syncthing:latest}
+    restart: unless-stopped
+    hostname: odysseus-syncthing
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    volumes:
+      - ${APP_DATA_DIR:-./data}/messaging/syncthing:/var/syncthing/config:z
+      - ${APP_DATA_DIR:-./data}/messaging/inbox/whatsapp:/var/syncthing/whatsapp:z
+    ports:
+      # Web UI: loopback only. Do not expose it to the network.
+      - "127.0.0.1:${SYNCTHING_GUI_PORT:-8384}:8384"
+      # Device sync + LAN discovery: must be reachable from the phone.
+      - "${SYNCTHING_SYNC_BIND:-0.0.0.0}:22000:22000/tcp"
+      - "${SYNCTHING_SYNC_BIND:-0.0.0.0}:22000:22000/udp"
+      - "${SYNCTHING_SYNC_BIND:-0.0.0.0}:21027:21027/udp"

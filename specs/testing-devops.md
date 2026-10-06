@@ -96,6 +96,8 @@ Compose variants forward `ODYSSEUS_TTS_CACHE_MAX_BYTES`, defaulting in the servi
 
 Docker does not mount the host Docker socket by default. Mounting it would grant powerful host access and is outside the default trust boundary. `docker/host-docker.yml` is the explicit opt-in overlay and sets `ODYSSEUS_ENABLE_HOST_DOCKER=true`; tests guard that the default and GPU compose files do not enable host Docker accidentally.
 
+`docker/messaging.yml` is an opt-in overlay that adds a Syncthing service for WhatsApp backup delivery (web UI on loopback only, sync port on `SYNCTHING_SYNC_BIND`) writing into `APP_DATA_DIR/messaging/inbox/whatsapp`; `PUID`/`PGID` must match the Odysseus container so it can read what Syncthing writes. Rootless Podman users also need `userns_mode: keep-id` so the container user maps to the host owner of mounted folders.
+
 ## GPU And Platform
 
 Base `docker-compose.yml` plus `docker/gpu.nvidia.yml` or `docker/gpu.amd.yml` are the GPU source of truth. Top-level `docker-compose.gpu-nvidia.yml` and `docker-compose.gpu-amd.yml` are standalone mirrors for stack-management UIs that accept one compose file. `tests/test_gpu_compose_standalone.py` guards drift between those forms.

@@ -17,7 +17,7 @@ This spec covers current app runtime wiring in:
 - `core/middleware.py`;
 - all route setup functions registered from `app.py`, including canonical
   `routes/admin_wipe/`, `routes/cleanup/`, `routes/compare/`, `routes/contacts/`, `routes/document/`, `routes/gallery/`, `routes/history/`, `routes/mcp/`, `routes/memory/`, `routes/note/`, `routes/research/`, `routes/search/`, `routes/task/`, `routes/vault/`, and `routes/webhook/` packages plus top-level compatibility shims;
-- `routes/prefs_routes.py`, `routes/workspace_routes.py`, and `companion/routes.py`;
+- `routes/prefs_routes.py`, `routes/workspace_routes.py`, `routes/messaging_routes.py` (`/api/messaging`), and `companion/routes.py`;
 - `src/generated_images.py` for generated-media file resolution;
 - `launcher.py`, `Odysseus.spec`, and platform launcher scripts where frozen/native startup changes runtime paths;
 - static entrypoints in `static/index.html`, `static/login.html`, and `static/app.js`.

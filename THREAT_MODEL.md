@@ -24,6 +24,7 @@ Odysseus is designed for **trusted users on a private network**, not public expo
 | Shell / Python execution | ✓ | ✗ |
 | File read / write | ✓ | ✗ |
 | Email send / read | ✓ | ✗ |
+| Signal / WhatsApp read (messaging) | ✓ | ✗ |
 | MCP tools | ✓ | ✗ |
 | Calendar management | ✓ | ✗ |
 | Token / webhook management | ✓ | ✗ |
@@ -58,7 +59,16 @@ External content that reaches the LLM is treated as untrusted via `src/prompt_se
 - `untrusted_context_message(label, content)` wraps the content in a `user`-role message with a header block instructing the model not to follow instructions inside it. Content goes in as data, not as a system instruction.
 - `UNTRUSTED_CONTEXT_POLICY` is a system-prompt preamble that states the same policy at the top of every session where untrusted data may appear.
 
-**Untrusted surfaces that must go through this wrapper:** web search results, fetched URLs, emails (read), saved memories, skill text, notes, and any tool output sourced from outside the server. Injecting untrusted content directly into the system role is a security bug.
+**Untrusted surfaces that must go through this wrapper:** web search results, fetched URLs, emails (read), Signal / WhatsApp messages, saved memories, skill text, notes, and any tool output sourced from outside the server. Injecting untrusted content directly into the system role is a security bug.
+
+### Messaging (Signal / WhatsApp)
+
+The messaging integration copies personal messages from data the user already holds (Signal Desktop's database, the phone's WhatsApp backup) into `data/messaging.db`. It never connects to Signal or WhatsApp and has no send path.
+
+- **At rest:** message text in `data/messaging.db` is plaintext, protected by file mode 0600 like the email index. Anyone who can read `data/` can read the messages. Disappearing messages are never indexed, and deletions in the source propagate on the next sync.
+- **Secrets:** the WhatsApp 64-digit backup key (which also decrypts the phone's Google Drive backup) and any Signal keyring password are encrypted with `data/.app_key`. A copy of `data/` that includes `.app_key` exposes them.
+- **Prompt injection:** message text is written by other people. The tools are classified `EXTERNAL_UNTRUSTED`, so once message text reaches the model, side-effecting tools need explicit approval.
+- **Mounts:** `docker/signal-desktop.yml` mounts Signal's folder read-only; source paths are confined to the Syncthing inbox, that mount, and `ODYSSEUS_MESSAGING_PATHS`.
 
 ## Security Headers
 

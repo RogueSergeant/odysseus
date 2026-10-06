@@ -92,6 +92,7 @@ Current major frontend areas include:
 - chat, stream handling, rendering, sessions, markdown, uploads, voice recorder, TTS, and keyboard shortcuts;
 - models, provider setup, pure model-key matching helpers, model picker, presets, search, RAG, settings, and admin;
 - settings shell modules under `static/js/settings/`: registry metadata, navigation, finder search, lifecycle/docking, DOM helpers, and persisted sidebar collapse/resize behavior;
+- `static/js/messagingSettings.js` for the admin-only Settings > Messaging panel, loaded lazily on first open; chat titles and sync errors come from outside Odysseus and are rendered with `textContent` only;
 - compare modules under `static/js/compare/`, including sanitized popup/search/image handling;
 - document editor/library in `static/js/document.js` and `static/js/documentLibrary.js`;
 - image editor integration in `static/js/galleryEditor.js` plus leaves under `static/js/editor/`;

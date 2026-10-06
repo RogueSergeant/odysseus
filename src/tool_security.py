@@ -34,12 +34,23 @@ BUILTIN_EMAIL_TOOLS = frozenset({
 })
 
 
+# Read-only tools over the local Signal / WhatsApp message index
+# (src/tools/messaging.py). Single source of truth for the fence tags,
+# dispatch, non-admin blocklist and plan-mode allowlist below — the same
+# pattern as BUILTIN_EMAIL_TOOLS. Personal messages are privileged admin data.
+MESSENGER_TOOLS = frozenset({
+    "list_messenger_chats",
+    "read_messenger_chat",
+    "search_messenger_messages",
+})
+
+
 # Tools regular/public users must not execute directly. These either expose
 # server/runtime access, sensitive user data, external messaging, persistent
 # state changes, or generic loopback/integration surfaces. All email tools are
 # included (SECURITY.md: email/MCP capabilities are privileged admin
 # functionality).
-NON_ADMIN_BLOCKED_TOOLS = BUILTIN_EMAIL_TOOLS | {
+NON_ADMIN_BLOCKED_TOOLS = BUILTIN_EMAIL_TOOLS | MESSENGER_TOOLS | {
     "bash",
     "python",
     "manage_bg_jobs",
@@ -123,7 +134,7 @@ PLAN_MODE_READONLY_TOOLS = {
     "resolve_contact",
     "chat_with_model",
     "ask_teacher",
-}
+} | set(MESSENGER_TOOLS)
 
 
 # The agent's tool gate is a DENYLIST: execute_tool_block blocks any tool whose
